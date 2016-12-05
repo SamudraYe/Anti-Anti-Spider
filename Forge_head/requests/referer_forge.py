@@ -24,7 +24,6 @@ headers = {
     "referer" : '123.123.123.123'#
 }
 
-
 #发起请求,
 def get_request(url,headers):
 	'''参数引入及头信息'''

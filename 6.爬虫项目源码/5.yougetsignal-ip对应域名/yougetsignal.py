@@ -36,7 +36,6 @@ headers = {
     'accept-encoding': "gzip, deflate",
     'accept-language': "zh-CN,zh;q=0.8",
     'postman-token': "87da47a1-61bd-04e3-f765-134f97a469c1"
-
 }
 
 response = requests.request("POST", url, data=payload, headers=headers)
