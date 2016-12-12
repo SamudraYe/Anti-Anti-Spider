@@ -4,11 +4,12 @@
 #   程序：SpiderGaoDe.py
 #   版本：0.1
 #   作者：***
-#   日期：编写日期2016/6/22
+#   日期：编写日期2016/12/7
 #   语言：Python 2.7.x
-#   操作：python SpiderGaoDe.py Table
+#   操作：python SpiderGaoDe.py
 #   功能：由IP获取高德地图中的经纬度
 #         表结构(id, ip, lon_gd, lat_gd, datetime, flag)
+#        接口已经失效 采用数据库批量插入优化等表结构优化
 #-------------------------------------------------------------------------
 import re ,os ,sys ,time ,json ,random ,MySQLdb ,requesocks ,threading
 
@@ -22,14 +23,17 @@ session = requesocks.session()
 # session.proxies = {'http':'socks5://127.0.0.1:9050','https':'socks5://127.0.0.1:9050'}
 #------------------------------------------------
 #   可修改的全局变量参数--Start.
-Table = "TW_ALL_IP_BLOCK_GD_20161107_ip"# sys.argv[1] # 表名称需修改
-HOST, USER, PASSWD, DB, PORT = '127.0.0.1', 'name', 'passwd', 'TW_ISP', 3306
-# HOST, USER, PASSWD, DB, PORT = '192.168.1.28', 'panghuihui', '********', "BJ_ISP", 3306  # 需修改
+#Table = "TW_ALL_IP_BLOCK_GD_20161107_ip"# sys.argv[1] # 表名称需修改
+#Table = "cn_ip_blk_single_ip_20161207_1_run"# sys.argv[1] # 表名称需修改
+Table = "table"# sys.argv[1] # 表名称需修改
+#HOST, USER, PASSWD, DB, PORT = '', '', '', '', 33306
+HOST, USER, PASSWD, DB, PORT = '', '', '', '', 3306
 
-select_sql = "SELECT id, ip FROM %s WHERE flag IS NULL AND lat_gd IS NULL ORDER BY RAND() Limit 30000;"  # 可修改
-Update_sql = "UPDATE %s SET datetime=now(), lon_gd='%s', lat_gd='%s', flag=%s WHERE id =%s;"  # 可修改
+#select_sql = "SELECT id, ip FROM %s WHERE flag IS NULL AND lat_gd IS NULL ORDER BY RAND() Limit 300000;"  # 可修改
+select_sql = "SELECT id,ip FROM %s where flag = 3 limit 30000;" # 在数据库中i已经打乱了.
+Update_sql = "UPDATE "+Table+" SET lon_gd=%s, lat_gd=%s, flag=%s WHERE id =%s;"  # 可修改
 
-THREAD_COUNT = 50  # 可修改
+THREAD_COUNT =  50  #可修改
 schedule = 0
 ErrorList = []
 WarnList = []
@@ -47,64 +51,90 @@ class Handle_HTML(threading.Thread):
 
     def run(self):
 
-        global schedule, ErrorList
-        connect, cursor = ConnectDB()#建立链接
+        global schedule
+        global ErrorList
+        connect, cursor = ConnectDB()
         self.lock.acquire()
         print "The Thread tasklist number :", len(self.tasklist)
         self.lock.release()
         total = len(self.tasklist)
-
-        #-------------------------
-        # 头字段伪造部分
-        # Host: ditu.amap.com
-        # Connection: keep-alive
-        # Pragma: no-cache
-        # Cache-Control: no-cache
-        # Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-        # Upgrade-Insecure-Requests: 1
-        # Referer:http://ditu.amap.com/
-        # User-Agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.107 Safari/537.36
-        # Accept-Encoding: deflate, sdch
-        # Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,en-US;q=0.4
-        # X-Forwarded-For: 43.224.40.10
-
         user_agent = 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
-
+        date_list = []
+        i = 0
         for (id, ip) in self.tasklist:
-            self.lock.acquire()#锁定
+            self.lock.acquire()
             time_Now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            print "Tread-%s:" % self.ThreadID, time_Now, "Already Completed:[%s] ,Also remaining:[%s]" % (schedule, self.Total_TaskNum - schedule) #？
-            self.lock.release()#释放
+            print "Tread-%s:" % self.ThreadID, time_Now, "Already Completed:[%s] ,Also remaining:[%s]" % (schedule, self.Total_TaskNum - schedule)
+            self.lock.release()
 
             headers = {
                     'User-Agent': user_agent,
-                    'Referer':'http://ditu.amap.com/',
-                    'X-Forwarded-For': ip  #通过伪造此字段来修改ip位置
+                    'Referer':'',
+                    'X-Forwarded-For': ip,
+                    'Accept':'*/*',
+                    'Accept-Encoding':'gzip, deflate, sdch',
+                    'Accept-Language':'zh-CN,zh;q=0.8',
+                    'Cache-Control':'no-cache',
+                    'Connection':'keep-alive',
+                    'Host':'ditu.amap.com',
+                    'Pragma':'no-cache',
+                    'Referer':''
+                    #User-Agent:Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/53.0.2785.143 Chrome/53.0.2785.143 Safari/537.36
                     }
-            URL = 'http://ditu.amap.com/service/pl/pl.json?rand=' + str(random.random())
-            lon, lat = '', ''
-
+            URL = '接口已经失效' + str(random.random())
+            #locator
+            #print URL
+            lon, lat = '0', '0'
+            i += 1
+            #print '*************************************',ip,i#,date_list
             try:
-                #---------------------------------
-                # 发出请求并且抽取需要的数据并返回
-                time.sleep(random.uniform(0, 1))#每个进程小休息一会
-                response = session.get(URL, headers=headers)#发请求
-                result = response.text.encode('utf-8')#改编码
+                time.sleep(random.uniform(0, 1))
+                response = session.get(URL, headers=headers)
+                #print response
+                result = response.text.encode('utf-8')
+                #print result
                 result = json.loads(result)
+                #print result
                 if result.has_key('lat'):
                     lon, lat = result['lng'], result['lat']
-                    print result['cip'], lon, lat
-                    cursor.execute(Update_sql % (Table, lon, lat, 1, id))
+                    #print result['cip'], lon, lat
+                    #print Update_sql % (Table, lon, lat, 1, id)
+                    #cursor.execute(Update_sql % (Table, lon, lat, 1, id))
+                    #connect.commit()
+                    #time.sleep(5)
+                    date_list.append([lon,lat,1,id])
                 else:
-                    cursor.execute(Update_sql % (Table, lon, lat, 0, id))
-                connect.commit()
+                    #print result['cip'], lon, lat
+                    #lon = '0'
+                    #lat = '0'
+                    date_list.append([lon,lat,0,id])
+                    #print Update_sql % (Table, lon, lat, 1, id)
+                    #cursor.execute(Update_sql % (Table, lon, lat, 0, id))
+
             except Exception as e:
+                print e
                 time.sleep(random.uniform(0, 3))
                 ErrorList.append("The ip is :[%s] Error:%s\n result:%s" %(ip, e, result))
+            try:
+                sql_num = int(random.uniform(200, 300)) #随机一个限制数,200-300 到则进行插入
+                if(i >= sql_num):
+
+                    i = 0
+                    cursor.executemany(Update_sql , date_list)
+                    connect.commit()
+                    date_list = []
+                    print 'uptime:10 ',time.ctime(),'&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&',sql_num
+                #print 'uptime:300 ',time.ctime()
+            except Exception as e:
+                print Exception,e
+                time.sleep(random.uniform(0, 3))
+                #time.sleep(10)
+                ErrorList.append("The ip is :[%s] Error:%s\n result:%s" %(ip, e, result))
                 # print "The ip is :[%s] Error:%s\n result:%s" %(ip, e, result)
-            self.lock.acquire()  #？
+            self.lock.acquire()
             schedule += 1
             self.lock.release()
+        cursor.executemany(Update_sql , date_list)#大爷的注释,,这里要保存一次
         connect.commit()
         connect.close()
 
@@ -154,9 +184,16 @@ def main():
     global ErrorList
     global WarnList
     connect, cursor = ConnectDB()
+    try:
+        #cursor.execute( "create table DataBase_GD.%s as SELECT * FROM DataBase_GD.GD_BJ_10_day_0;" % Table )
+        pass
+    except Exception,e:
+        print Exception,e
     cursor.execute(
-        "SELECT COUNT(*) FROM %s WHERE flag IS NULL;" % Table)
+        "SELECT COUNT(*) FROM %s WHERE flag = 3 ;" % Table)
+		#create table DataBase_GD.GD_BJ_10_day_0 as SELECT * FROM DataBase_RTB.GD_BJ_10_day_0;
     TaskNum = cursor.fetchall()
+    #TaskNum = 98914  #表的大小
     connect.close()
     if TaskNum[0][0] == 0:
         print "Warning:There is no need to do the task!!!"
@@ -180,7 +217,6 @@ def main():
     print "Error:", len(ErrorList), "Warning:",len(WarnList)
 
 if __name__ == '__main__':
-
     print "The Program start time:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     start = time.time()
     main()

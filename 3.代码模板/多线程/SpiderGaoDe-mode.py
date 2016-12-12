@@ -7,8 +7,9 @@
 #   日期：编写日期2016/6/22
 #   语言：Python 2.7.x
 #   操作：python SpiderGaoDe.py Table
-#   功能：由IP获取高德地图中的经纬度
+#   功能：由IP获取地图中的经纬度
 #         表结构(id, ip, lon_gd, lat_gd, datetime, flag)
+#        本接口已经失效,
 #-------------------------------------------------------------------------
 import re ,os ,sys ,time ,json ,random ,MySQLdb ,requesocks ,threading
 
@@ -24,7 +25,6 @@ session = requesocks.session()
 #   可修改的全局变量参数--Start.
 Table = "TW_ALL_IP_BLOCK_GD_20161107_ip"# sys.argv[1] # 表名称需修改
 HOST, USER, PASSWD, DB, PORT = '127.0.0.1', 'name', 'passwd', 'TW_ISP', 3306
-# HOST, USER, PASSWD, DB, PORT = '192.168.1.28', 'panghuihui', '********', "BJ_ISP", 3306  # 需修改
 
 select_sql = "SELECT id, ip FROM %s WHERE flag IS NULL AND lat_gd IS NULL ORDER BY RAND() Limit 30000;"  # 可修改
 Update_sql = "UPDATE %s SET datetime=now(), lon_gd='%s', lat_gd='%s', flag=%s WHERE id =%s;"  # 可修改
@@ -54,20 +54,6 @@ class Handle_HTML(threading.Thread):
         self.lock.release()
         total = len(self.tasklist)
 
-        #-------------------------
-        # 头字段伪造部分
-        # Host: ditu.amap.com
-        # Connection: keep-alive
-        # Pragma: no-cache
-        # Cache-Control: no-cache
-        # Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-        # Upgrade-Insecure-Requests: 1
-        # Referer:http://ditu.amap.com/
-        # User-Agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.107 Safari/537.36
-        # Accept-Encoding: deflate, sdch
-        # Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,en-US;q=0.4
-        # X-Forwarded-For: 43.224.40.10
-
         user_agent = 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
 
         for (id, ip) in self.tasklist:
@@ -78,10 +64,10 @@ class Handle_HTML(threading.Thread):
 
             headers = {
                     'User-Agent': user_agent,
-                    'Referer':'http://ditu.amap.com/',
+                    'Referer':'',
                     'X-Forwarded-For': ip  #通过伪造此字段来修改ip位置
                     }
-            URL = 'http://ditu.amap.com/service/pl/pl.json?rand=' + str(random.random())
+            URL = '已经失效' + str(random.random())
             lon, lat = '', ''
 
             try:

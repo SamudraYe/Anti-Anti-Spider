@@ -9,7 +9,7 @@ url = 'http://api.ipify.org?format=json'
 def getip_requests(url):
     print "(+) Sending request with plain requests..."
     r = requests.get(url)
-    print "(+) IP is: " + r.text.replace("\n", "")                       
+    print "(+) IP is: " + r.text.replace("\n", "")
 
 def getip_requesocks(url):
     print "(+) Sending request with requesocks..."
