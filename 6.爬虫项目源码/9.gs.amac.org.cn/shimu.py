@@ -4,7 +4,7 @@
 #   程序：shimu.py
 #   版本：0.1
 #   作者：copie
-#   日期：编写日期2016/11/23
+#   日期：编写日期2016/12/15
 #   语言：Python 3.5.x
 #   系统:   archlinux 
 #   操作：python shimu.py
