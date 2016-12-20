@@ -5,7 +5,7 @@
 
 本项目由URLTEAM维护
 
-作者博客 www.urlteam.org 
+作者博客 https://www.urlteam.org 
 
 项目简介：
 运用请求伪造，浏览器伪造,浏览器自动化，图像处理，ip处理等方式进行反爬虫技术的通用化使用。
