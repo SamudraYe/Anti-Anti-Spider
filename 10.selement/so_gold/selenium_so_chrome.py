@@ -21,6 +21,7 @@ Type = sys.getfilesystemencoding()
 
 #加载内核
 driver = webdriver.Chrome()
+#driver = webdriver.Firefox()
 
 #发起请求
 driver.get("https://stackoverflow.com/users/login?ssrc=head&returnurl=http%3a%2f%2fstackoverflow.com%2fusers%2f7197440%2fa83533774%3ftab%3dtopactivity")
